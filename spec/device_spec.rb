@@ -118,10 +118,33 @@ describe Domoticz::Device do
     end
 
     context 'when the device has no timers' do
-      it 'returns nil' do
+      it 'returns []' do
         stub_server_with_fixture(params: "type=devices&filter=all&used=true", fixture: "switches.json")
         switch = Domoticz::Device.find_by_id(2)
-        expect(switch.timers).to be_nil
+        expect(switch.timers).to eq([])
+      end
+    end
+  end
+
+  describe '#schedules' do
+    context 'when the device has schedules' do
+      it 'returns the associated schedules' do
+        stub_server_with_fixture(params: "type=devices&filter=all&used=true", fixture: "devices.json")
+        stub_server_with_fixture(params: "type=schedules", fixture: "schedules.json")
+
+        device = Domoticz::Device.find_by_id(65)
+        expect(device.schedules).to be_kind_of(Array)
+        device.schedules.each { |t| expect(t).to be_a(Domoticz::Schedule) }
+      end
+    end
+
+    context 'when the device has no schedules' do
+      it 'returns []' do
+        stub_server_with_fixture(params: "type=devices&filter=all&used=true", fixture: "devices.json")
+        stub_server_with_fixture(params: "type=schedules", fixture: "schedules.json")
+        
+        switch = Domoticz::Device.find_by_id(2)
+        expect(switch.schedules).to eq([])
       end
     end
   end

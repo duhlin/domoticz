@@ -26,6 +26,8 @@ module Domoticz
     def timers
       if @data['Timers'] || @data['Timers'] == 'true'
         Domoticz.perform_api_request("type=timers&idx=#{idx}")['result'].map{|t| Timer.new_from_json(t)}
+      else
+        []
       end
     end
 
@@ -51,8 +53,8 @@ module Domoticz
     end
 
     TimerDate = Struct.new(:timer, :date)
-    def next_timers(date = DateTime.now)
-      sorted = timers
+    def next_thing(type, date)
+      sorted = send(type)
         .map{|t| TimerDate.new(t, t.next_date(date))}
         .select(&:date) # remove event without next date
         .sort_by(&:date)
@@ -60,25 +62,37 @@ module Domoticz
       sorted.take_while{|t| t.date == first.date}.to_a
     end
 
-    def enum_next_timers(date = DateTime.now)
-      return enum_for(:enum_next_timers, date).lazy unless block_given?
+    def enum_next_thing(type, date)
+      return enum_for(:enum_next_thing, type, date).lazy unless block_given?
       while true
-        timers = next_timers(date)
+        timers = next_thing(type, date)
         break if timers.empty?
         timers.each { |t| yield t }
         date = timers.first.date
       end
     end
+    
+    def next_timers(date = DateTime.now)
+      next_thing(:timers, date)
+    end
 
-    Schedule = Struct.new(:date, :data)
-    def next_schedule
-      date = Time.now
+    def enum_next_timers(date = DateTime.now)
+      enum_next_thing(:timers, date)
+    end
+
+    def schedules
       result = Domoticz.perform_api_request("type=schedules")['result']
       result
-        .select{|t| Integer(t['RowID']||t['DeviceRowID']) == idx && t['Active'] == 'true' }
-        .map{|t| Schedule.new(Time.strptime(t['ScheduleDate'], '%Y-%m-%d %H:%M:%S'), t)}
-        .select{ |s| s.date > date }
-        .min_by(&:date) if result
+        .select{ |t| Integer(t['RowID']||t['DeviceRowID']) == idx && t['Active'] == 'true' }
+        .map{ |t| Schedule.new_from_json(t) }
+    end
+
+    def next_schedules(date = DateTime.now)
+      next_thing(:schedules, date)
+    end
+
+    def enum_next_schedulues(date = DateTime.now)
+      enum_next_thing(:schedules, date)
     end
 
     def temperature
