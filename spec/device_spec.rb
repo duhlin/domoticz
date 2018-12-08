@@ -160,11 +160,11 @@ describe Domoticz::Device do
     end
   end
   let(:timer_dates) {[
-    DateTime.new(2016, 2, 23, 8, 0),
-    DateTime.new(2016, 2, 23, 9, 0),
-    DateTime.new(2016, 2, 23, 8, 0),
-    DateTime.new(2016, 2, 23, 7, 0),
-    DateTime.new(2016, 2, 23, 10, 0),
+    DateTime.new(2016, 2, 23, 8, 0, 0, LOCAL_OFFSET),
+    DateTime.new(2016, 2, 23, 9, 0, 0, LOCAL_OFFSET),
+    DateTime.new(2016, 2, 23, 8, 0, 0, LOCAL_OFFSET),
+    DateTime.new(2016, 2, 23, 7, 0, 0, LOCAL_OFFSET),
+    DateTime.new(2016, 2, 23, 10, 0, 0, LOCAL_OFFSET),
   ]}
   let(:timers) { timer_dates.each_with_index.map{|d, i| create_timer(i, d)} }
 
@@ -172,20 +172,20 @@ describe Domoticz::Device do
     it 'returns TimerDate objects' do
       allow(subject).to receive(:timers).and_return(timers)
       expect(
-        subject.next_timers(DateTime.new(2016, 2, 23, 7, 30)).all?{|e| e.is_a? Domoticz::Device::TimerDate}
+        subject.next_timers(DateTime.new(2016, 2, 23, 7, 30, 0, LOCAL_OFFSET)).all?{|e| e.is_a? Domoticz::Device::TimerDate}
       ).to be true
     end
     it 'returns the list of the next timers' do
       allow(subject).to receive(:timers).and_return(timers)
       expect(
-        subject.next_timers(DateTime.new(2016, 2, 23, 7, 30)).map(&:timer)
+        subject.next_timers(DateTime.new(2016, 2, 23, 7, 30, 0, LOCAL_OFFSET)).map(&:timer)
       ).to eq(
         [timers[0], timers[2]]
       )
 
       # can be called twice
       expect(
-        subject.next_timers(DateTime.new(2016, 2, 23, 7, 30)).map(&:timer)
+        subject.next_timers(DateTime.new(2016, 2, 23, 7, 30, 0, LOCAL_OFFSET)).map(&:timer)
       ).to eq(
         [timers[0], timers[2]]
       )
@@ -193,12 +193,12 @@ describe Domoticz::Device do
 
       # list can be empty
       expect(
-        subject.next_timers(DateTime.new(2016, 2, 23, 10, 1))
+        subject.next_timers(DateTime.new(2016, 2, 23, 10, 1, 0, LOCAL_OFFSET))
       ).to be_empty
     end
   end
   describe '#enum_next_timers' do
-    let(:now) { DateTime.new(2016, 2, 23, 0, 0) }
+    let(:now) { DateTime.new(2016, 2, 23, 0, 0, 0, LOCAL_OFFSET) }
     it 'returns an enumerator on the next timers' do
       allow(subject).to receive(:timers).and_return(timers)
       expect( subject.enum_next_timers(now)).to be_a Enumerator
@@ -217,7 +217,7 @@ describe Domoticz::Device do
           }
         end
       ])
-      first = DateTime.new(now.year, now.month, now.day, 12, 0)
+      first = DateTime.new(now.year, now.month, now.day, 12, 0, 0, LOCAL_OFFSET)
       expect(
         subject.enum_next_timers(now).map(&:date).first(3)
       ).to eq(first.upto(first.next_day(2)).to_a)
