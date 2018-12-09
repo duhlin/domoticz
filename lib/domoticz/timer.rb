@@ -40,7 +40,7 @@ module Domoticz
     def apply_to?(day)
       case(day)
       when Symbol then (DAY_FLAGS[day] & @data['Days']) != 0
-      when Date then self.apply_to?(DAYS[day.wday])
+      when Time then self.apply_to?(DAYS[day.wday])
       else
         fail "#{day.class}: unsupported type"
       end
@@ -59,26 +59,25 @@ module Domoticz
     BEFORE_SUNSET = 3
     AFTER_SUNSET = 4
     FIXED_DATE = 5 
-    def next_date(date = DateTime.now)
-      local_offset = DateTime.now.offset
+    def next_date(date = Time.now)
       case type
       when BEFORE_SUNRISE, AFTER_SUNRISE
         if ([date.hour, date.min] <=> (t=Domoticz.sunrise_sunset.sunrise_array)) < 0
-          DateTime.new(date.year, date.month, date.day, *t, 0, local_offset)
+          Time.new(date.year, date.month, date.day, *t)
         else
-          DateTime.new(date.year, date.month, date.day, *t, 0, local_offset).next_day
+          Time.new(date.year, date.month, date.day, *t).next_day
         end
       when BEFORE_SUNSET, AFTER_SUNSET
         if ([date.hour, date.min] <=> (t=Domoticz.sunrise_sunset.sunset_array)) < 0
-          DateTime.new(date.year, date.month, date.day, *t, 0, local_offset)
+          Time.new(date.year, date.month, date.day, *t)
         else
-          DateTime.new(date.year, date.month, date.day, *t, 0, local_offset).next_day
+          Time.new(date.year, date.month, date.day, *t).next_day
         end
       when ON_TIME
-        c = DateTime.new(date.year, date.month, date.day, *time_array, 0, local_offset)
+        c = Time.new(date.year, date.month, date.day, *time_array)
         c.upto(c.next_day(7)).find{ |d| date < d && self.apply_to?(d) }
       when FIXED_DATE
-        c = DateTime.new(*date_array, *time_array, 0, local_offset)
+        c = Time.new(*date_array, *time_array)
         c if c > date
       end
     end

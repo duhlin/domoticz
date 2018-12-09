@@ -72,11 +72,11 @@ module Domoticz
       end
     end
     
-    def next_timers(date = DateTime.now)
+    def next_timers(date = Time.now)
       next_thing(:timers, date)
     end
 
-    def enum_next_timers(date = DateTime.now)
+    def enum_next_timers(date = Time.now)
       enum_next_thing(:timers, date)
     end
 
@@ -87,11 +87,11 @@ module Domoticz
         .map{ |t| Schedule.new_from_json(t) }
     end
 
-    def next_schedules(date = DateTime.now)
+    def next_schedules(date = Time.now)
       next_thing(:schedules, date)
     end
 
-    def enum_next_schedulues(date = DateTime.now)
+    def enum_next_schedulues(date = Time.now)
       enum_next_thing(:schedules, date)
     end
 

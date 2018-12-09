@@ -2,6 +2,7 @@ require 'net/http'
 require "domoticz/version"
 require "domoticz/configuration"
 require "domoticz/device"
+require "domoticz/time_ext"
 require "domoticz/timer"
 require "domoticz/schedule"
 require "domoticz/sunrise_sunset"

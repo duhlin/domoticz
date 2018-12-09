@@ -75,10 +75,10 @@ describe Domoticz::Timer do
         )
       end
     end
-    it 'can be applied with a Date object' do
+    it 'can be applied with a Time object' do
       subject.data = {'Days' => Domoticz::Timer::WEEKENDS}
-      expect(subject.apply_to?(Date.new(2016, 02, 26))).to be false #it's friday
-      expect(subject.apply_to?(DateTime.new(2016, 02, 27, 10, 45, 0, LOCAL_OFFSET))).to be true #it's saturday
+      expect(subject.apply_to?(Time.new(2016, 02, 26))).to be false #it's friday
+      expect(subject.apply_to?(Time.new(2016, 02, 27, 10, 45))).to be true #it's saturday
 
 
     end
@@ -96,7 +96,7 @@ describe Domoticz::Timer do
     end
   end
   describe '#next_date' do
-    let(:now) { DateTime.new(2016, 02, 22, 8, 30, 0, LOCAL_OFFSET) }
+    let(:now) { Time.new(2016, 02, 22, 8, 30) }
     context 'when the timer is configured with a fixed date' do
       before(:each) { subject.data = {'Type'=> 5} }
       context 'when the fixed date is in the future' do
@@ -105,7 +105,7 @@ describe Domoticz::Timer do
           subject.data['Time'] = '08:30'
         }
         it 'returns the fixed date' do
-          expect(subject.next_date(now)).to eq(DateTime.new(2050, 02, 15, 8, 30, 0, LOCAL_OFFSET))
+          expect(subject.next_date(now)).to eq(Time.new(2050, 02, 15, 8, 30))
         end
       end
       context 'when the fixed date is in the past' do
@@ -128,12 +128,12 @@ describe Domoticz::Timer do
       }
       it 'returns the next date' do
         expect(subject.next_date(now)).to eq(
-          DateTime.new(2016, 02, 27, 8, 45, 0, LOCAL_OFFSET)
+          Time.new(2016, 02, 27, 8, 45)
         )
       end
       it 'the next date should be greater than current date' do
-        expect(subject.next_date(DateTime.new(2016, 02, 27, 8, 45, 0, LOCAL_OFFSET))).to eq(
-          DateTime.new(2016, 02, 27, 8, 45, 0, LOCAL_OFFSET).next_day(7)
+        expect(subject.next_date(Time.new(2016, 02, 27, 8, 45))).to eq(
+          Time.new(2016, 02, 27, 8, 45).next_day(7)
         )
       end
     end
@@ -152,26 +152,26 @@ describe Domoticz::Timer do
       context 'when its related to sunrise' do
         before(:each) { subject.data = {'Type' => 0} }
         it 'returns the sunrise on the current day when before the sunrise' do
-          expect(subject.next_date(DateTime.new(2016, 02, 22, 7, 59, 0, LOCAL_OFFSET))).to eq(
-            DateTime.new(2016, 02, 22, 8, 0, 0, LOCAL_OFFSET)
+          expect(subject.next_date(Time.new(2016, 02, 22, 7, 59))).to eq(
+            Time.new(2016, 02, 22, 8, 0)
           )
         end
         it 'returns the sunrize the next day when after the sunrise' do
-          expect(subject.next_date(DateTime.new(2016, 02, 22, 8, 0, 0, LOCAL_OFFSET))).to eq(
-            DateTime.new(2016, 02, 23, 8, 0, 0, LOCAL_OFFSET)
+          expect(subject.next_date(Time.new(2016, 02, 22, 8, 0))).to eq(
+            Time.new(2016, 02, 23, 8, 0)
           )
         end
       end
       context 'when its related to sunset' do
         before(:each) { subject.data = {'Type' => 4} }
         it 'returns the sunset on the current day when before the sunset' do
-          expect(subject.next_date(DateTime.new(2016, 02, 22, 19, 59, 0, LOCAL_OFFSET))).to eq(
-            DateTime.new(2016, 02, 22, 20, 0, 0, LOCAL_OFFSET)
+          expect(subject.next_date(Time.new(2016, 02, 22, 19, 59))).to eq(
+            Time.new(2016, 02, 22, 20, 0)
           )
         end
         it 'returns the sunset on the next day when after the sunset' do
-          expect(subject.next_date(DateTime.new(2016, 02, 22, 20, 0, 0, LOCAL_OFFSET))).to eq(
-            DateTime.new(2016, 02, 23, 20, 0, 0, LOCAL_OFFSET)
+          expect(subject.next_date(Time.new(2016, 02, 22, 20, 0))).to eq(
+            Time.new(2016, 02, 23, 20, 0)
           )
         end
       end
